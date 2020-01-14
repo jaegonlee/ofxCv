@@ -45,7 +45,7 @@ void ofApp::update() {
 	if(homographyReady) {
 		// this is how you warp one ofImage into another ofImage given the homography matrix
 		// CV INTER NN is 113 fps, CV_INTER_LINEAR is 93 fps
-		warpPerspective(right, warpedColor, homography, CV_INTER_LINEAR);
+		warpPerspective(right, warpedColor, homography, INTER_LINEAR);
 		warpedColor.update();
 	}
 }
