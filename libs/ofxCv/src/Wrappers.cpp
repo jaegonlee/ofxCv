@@ -56,21 +56,22 @@ namespace ofxCv {
 		std::vector<int> hullIndices;
 		convexHull(Mat(contour), hullIndices, false, false);
 		std::vector<cv::Vec4i> convexityDefects;
-		if(hullIndices.size() > 0 && contour.size() > 0) {		
-			CvMat contourMat = cvMat(1, contour.size(), CV_32SC2, (void*) &contour[0]);
-			CvMat hullMat = cvMat(1, hullIndices.size(), CV_32SC1, (void*) &hullIndices[0]);
-			CvMemStorage* storage = cvCreateMemStorage(0);
-			CvSeq* defects = cvConvexityDefects(&contourMat, &hullMat, storage);
-			for(int i = 0; i < defects->total; i++){
-				CvConvexityDefect* cur = (CvConvexityDefect*) cvGetSeqElem(defects, i);
-				cv::Vec4i defect;
-				defect[0] = cur->depth_point->x;
-				defect[1] = cur->depth_point->y;
-				defect[2] = (cur->start->x + cur->end->x) / 2;
-				defect[3] = (cur->start->y + cur->end->y) / 2;
-				convexityDefects.push_back(defect);
-			}
-			cvReleaseMemStorage(&storage);
+		if(hullIndices.size() > 0 && contour.size() > 0) {
+			cv::Mat contourMat = Mat(1, contour.size(), CV_32SC2, (void*) &contour[0]);
+			cv::Mat hullMat = Mat(1, hullIndices.size(), CV_32SC1, (void*) &hullIndices[0]);
+//			cv::MemStorage* storage = cv::CreateMemStorage(0);
+//			cv::Seq* defects = cvConvexityDefects(&contourMat, &hullMat, storage);
+//
+//			for(int i = 0; i < defects->total; i++){
+//				CvConvexityDefect* cur = (CvConvexityDefect*) cvGetSeqElem(defects, i);
+//				cv::Vec4i defect;
+//				defect[0] = cur->depth_point->x;
+//				defect[1] = cur->depth_point->y;
+//				defect[2] = (cur->start->x + cur->end->x) / 2;
+//				defect[3] = (cur->start->y + cur->end->y) / 2;
+//				convexityDefects.push_back(defect);
+//			}
+//			cvReleaseMemStorage(&storage);
 		}
 		return convexityDefects;
 	}
@@ -92,7 +93,7 @@ namespace ofxCv {
 	
 	void fitLine(const ofPolyline& polyline, glm::vec2& point, glm::vec2& direction) {
 		Vec4f line;
-		fitLine(Mat(toCv(polyline)), line, CV_DIST_L2, 0, .01, .01);
+        fitLine(Mat(toCv(polyline)), line, DIST_L2, 0, .01, .01);
 
         direction = glm::vec2(line[0], line[1]);
         point = glm::vec2(line[2], line[3]);
