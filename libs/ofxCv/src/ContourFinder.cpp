@@ -27,7 +27,7 @@ namespace ofxCv {
 	,simplify(true)
 	,thresholdValue(128.)
 	,useTargetColor(false)
-	,contourFindingMode(CV_RETR_EXTERNAL)
+,contourFindingMode(cv::RETR_EXTERNAL)
 	,sortBySize(false) {
 		resetMinArea();
 		resetMaxArea();
@@ -51,8 +51,8 @@ namespace ofxCv {
 				if(trackingColorMode == TRACK_COLOR_HS) {
 					offset[2] = 255;
 				}
-				cvtColor(img, hsvBuffer, CV_RGB2HSV);
-				base = toCv(convertColor(targetColor, CV_RGB2HSV));
+                cvtColor(img, hsvBuffer, cv::COLOR_RGB2HSV);
+                base = toCv(convertColor(targetColor, cv::COLOR_RGB2HSV));
 				cv::Scalar lowerb = base - offset;
 				cv::Scalar upperb = base + offset;
 				inRange(hsvBuffer, lowerb, upperb, thresh);
@@ -66,7 +66,7 @@ namespace ofxCv {
 		
 		// run the contour finder
 		std::vector<std::vector<cv::Point> > allContours;
-		int simplifyMode = simplify ? CV_CHAIN_APPROX_SIMPLE : CV_CHAIN_APPROX_NONE;
+        int simplifyMode = simplify ? cv::CHAIN_APPROX_SIMPLE : cv::CHAIN_APPROX_NONE;
 		cv::findContours(thresh, allContours, contourFindingMode, simplifyMode);
 		
 		// filter the contours
@@ -128,9 +128,9 @@ namespace ofxCv {
 
 	void ContourFinder::setFindHoles(bool findHoles){
 		if(findHoles){
-			contourFindingMode = CV_RETR_LIST;
+            contourFindingMode = cv::RETR_LIST;
 		}else{
-			contourFindingMode = CV_RETR_EXTERNAL;
+            contourFindingMode = cv::RETR_EXTERNAL;
 		}
 	}
 
@@ -276,10 +276,6 @@ namespace ofxCv {
 		return tracker;
 	}
 	
-    double ContourFinder::pointPolygonTest(unsigned int i, cv::Point2f point) {
-        return cv::pointPolygonTest(contours[i], point, true);
-    }
-    
 	void ContourFinder::setAutoThreshold(bool autoThreshold) {
 		this->autoThreshold = autoThreshold;
 	}
