@@ -32,7 +32,7 @@
 #include "ofVectorMath.h"
 #include "ofImage.h"
 
-// coherent line drawing
+// coherent line drawing	
 #include "imatrix.h"
 #include "ETF.h"
 #include "fdog.h"
@@ -74,14 +74,12 @@ cv::name(xMat, yMat, resultMat);\
 	wrapThree(bitwise_xor);
 
 	// inverting non-floating point images is a just a bitwise not operation
-	template <class S, class D>
-    void invert(S& src, D& dst) {
+	template <class S, class D> void invert(S& src, D& dst) {
 		cv::Mat srcMat = toCv(src), dstMat = toCv(dst);
 		bitwise_not(srcMat, dstMat);
 	}
 
-	template <class SD>
-    void invert(SD& srcDst) {
+	template <class SD> void invert(SD& srcDst) {
 		ofxCv::invert(srcDst, srcDst);
 	}
 
@@ -193,9 +191,9 @@ cv::name(xMat, yMat, resultMat);\
     void copyGray(const S& src, D& dst) {
         int channels = getChannels(src);
         if(channels == 4) {
-            convertColor(src, dst, CV_RGBA2GRAY);
+            convertColor(src, dst, cv::COLOR_RGBA2GRAY);
         } else if(channels == 3) {
-            convertColor(src, dst, CV_RGB2GRAY);
+            convertColor(src, dst, cv::COLOR_RGB2GRAY);
         } else if(channels == 1) {
             copy(src, dst);
         }
@@ -303,25 +301,23 @@ cv::name(xMat, yMat, resultMat);\
 		if(black != 0) {
 			add(dstMat, cv::Scalar(black), dstMat);
 		}
-		// fast copy from dst (unsigned char) to img (int)
-        for(int y = 0; y < height; ++y) {
-            const unsigned char* dstPtr = dstMat.ptr<unsigned char>(y);
-            for(int x = 0; x < width; ++x) {
-                img[y][x] = dstPtr[x];
-            }
-        }
+		// copy from dst (unsigned char) to img (int)
+		for(int y = 0; y < height; y++) {
+			for(int x = 0; x < width; x++) {
+				img[y][x] = dstMat.at<unsigned char>(y, x);
+			}
+		}
 		ETF etf;
 		etf.init(height, width);
 		etf.set(img);
 		etf.Smooth(halfw, smoothPasses);
 		GetFDoG(img, etf, sigma1, sigma2, tau);
-		// fast copy result from img (int) to dst (unsigned char)
-        for(int y = 0; y < height; ++y) {
-            unsigned char* dstPtr = dstMat.ptr<unsigned char>(y);
-            for(int x = 0; x < width; ++x) {
-                dstPtr[x] = img[y][x];
-            }
-        }
+		// copy result from img (int) to dst (unsigned char)
+		for(int y = 0; y < height; y++) {
+			for(int x = 0; x < width; x++) {
+				dstMat.at<unsigned char>(y, x) = img[y][x];
+			}
+		}
 	}
 
 	// dst does not imitate src
@@ -384,26 +380,15 @@ cv::name(xMat, yMat, resultMat);\
 	cv::RotatedRect minAreaRect(const ofPolyline& polyline);
 	cv::RotatedRect fitEllipse(const ofPolyline& polyline);
 	void fitLine(const ofPolyline& polyline, glm::vec2& point, glm::vec2& direction);
-    
-    // Fills a convex polygon. It is much faster than the function fillPoly().
-    // It can fill not only convex polygons but any monotonic polygon without self-intersections.
-    // Apolygon whose contour intersects every horizontal line (scan line) twice at the most
-    // (though, its top-most and/or the bottom edge could be horizontal).
-    template <class D>
-    void fillConvexPoly(const std::vector<cv::Point>& points, D& dst) {
-        cv::Mat dstMat = toCv(dst);
-        dstMat.setTo(cv::Scalar(0));
-        cv::fillConvexPoly(dstMat, points, cv::Scalar(255));    // default 8-connected, no shift
-    }
-    
-	// Fills the area bounded by one or more polygons into a texture (image)
-    // The function can fill complex areas, for example, areas with holes,
-    // contours with self-intersections (some of their parts), and so forth.
+
+	// kind of obscure function, draws filled polygons on the CPU
 	template <class D>
 	void fillPoly(const std::vector<cv::Point>& points, D& dst) {
 		cv::Mat dstMat = toCv(dst);
+		const cv::Point* ppt[1] = { &(points[0]) };
+		int npt[] = { (int) points.size() };
 		dstMat.setTo(cv::Scalar(0));
-        cv::fillPoly(dstMat, points, cv::Scalar(255));          // default 8-connected, no shift
+		fillPoly(dstMat, ppt, npt, 1, cv::Scalar(255));
 	}
 
 	template <class S, class D>
@@ -454,7 +439,7 @@ cv::name(xMat, yMat, resultMat);\
 		cv::Mat dstMat = toCv(dst);
         cv::transpose(srcMat, dstMat);
     }
-    
+
 	// finds the 3x4 matrix that best describes the (premultiplied) affine transformation between two point clouds
 	ofMatrix4x4 estimateAffine3D(std::vector<glm::vec3>& from, std::vector<glm::vec3>& to, float accuracy = .99);
 	ofMatrix4x4 estimateAffine3D(std::vector<glm::vec3>& from, std::vector<glm::vec3>& to, std::vector<unsigned char>& outliers, float accuracy = .99);
